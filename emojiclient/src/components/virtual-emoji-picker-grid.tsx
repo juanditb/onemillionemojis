@@ -19,7 +19,7 @@ const OVERSCAN = 5;
 const EmojiPicker = React.memo(({ onSelect, selected, emoji }: { onSelect: () => void, selected: boolean, emoji: string }) => {
   if (selected && emoji) {
     return (
-      <div className="w-10 h-10 flex items-center justify-center text-2xl border border-transparent">
+      <div className="w-10 h-10 flex items-center justify-center text-2xl border border-transparent animate-fade-in">
         {emoji}
       </div>
     );
@@ -90,7 +90,7 @@ export default function VirtualEmojiPickerGrid({ intArray, sendUpdate }: { intAr
       setIsOpen(false);
       setActivePickerIndex(null);
     }
-  }, [activePickerIndex]);
+  }, [activePickerIndex, sendUpdate]);
 
   const openModal = useCallback((index: string) => {
     if (!selectedEmojis.has(index)) {
