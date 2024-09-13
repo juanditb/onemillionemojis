@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import VirtualEmojiPickerGridComponent from "./components/virtual-emoji-picker-grid";
 import { Header } from "./components/header";
 
@@ -90,11 +90,18 @@ const App: React.FC = () => {
     }
   }, [ws]);
 
+  const remainingEmojis = useMemo(() => {
+    if (intArray === null) {
+      return null;
+    }
+    return intArray.filter(value => value === 0).length;
+  }, [intArray]);
+
   return (
     <>
-      <Header />
+      <Header remainingEmojis={remainingEmojis} />
       <VirtualEmojiPickerGridComponent intArray={intArray} sendUpdate={sendUpdateMessage} />
-      </>
+    </>
   );
 };
 

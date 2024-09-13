@@ -3,7 +3,7 @@ import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 
-export function Header() {
+export function Header({ remainingEmojis }: { remainingEmojis: number | null }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
@@ -13,6 +13,11 @@ export function Header() {
           <a href="/" className="flex items-center space-x-2">
             <span className="font-bold text-2xl">😂 One Million Emojis 😎</span>
           </a>
+          {remainingEmojis !== null &&
+          <div className="hidden md:flex items-center space-x-4">
+            <span className="font-bold text-xl">{remainingEmojis.toLocaleString()} emojis left</span>
+          </div>
+          }
           <nav className="hidden md:flex space-x-16">
             <NavLinks />
           </nav>
@@ -25,8 +30,11 @@ export function Header() {
             >
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </Button>
-            {isMenuOpen && (
+            {isMenuOpen && remainingEmojis !== null && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                <div className="px-4 py-2 text-gray-800 font-bold">
+                  {remainingEmojis.toLocaleString()} emojis left
+                </div>
                 <NavLinks mobile />
               </div>
             )}

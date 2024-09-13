@@ -89,6 +89,7 @@ export default function VirtualEmojiPickerGrid({ intArray, sendUpdate }: { intAr
       });
       setIsOpen(false);
       setActivePickerIndex(null);
+      setSearchTerm("");
     }
   }, [activePickerIndex, sendUpdate]);
 
