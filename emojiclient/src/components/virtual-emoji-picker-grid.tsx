@@ -143,9 +143,9 @@ export default function VirtualEmojiPickerGrid({ intArray, sendUpdate }: { intAr
               onChange={handleSearchChange}
             />
             <div className="grid grid-cols-8 gap-2 max-h-[50vh] overflow-y-auto">
-              {filteredEmojis.map((emojiObj, index) => (
+              {filteredEmojis.map((emojiObj) => (
                 <Button
-                  key={index}
+                  key={emojiObj.id}
                   variant="ghost"
                   className="text-2xl p-2"
                   onClick={() => handleEmojiSelect(emojiObj)}

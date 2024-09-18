@@ -20,7 +20,7 @@ const (
 	totalBits          = gridSize * gridSize * 16
 	totalBytes         = totalBits / 8
 	websocketPort      = "8888"
-	rateLimit          = 5 // messages per second
+	rateLimit          = 2  // messages per second
 	burstLimit         = 10 // maximum burst size
 	emojiListSize      = 1644
 )
@@ -34,6 +34,9 @@ var (
 	}
 	clients    = make(map[*websocket.Conn]*rate.Limiter)
 	clientsMux sync.Mutex
+
+	ips        = make(map[string]*rate.Limiter)
+	ipMux      sync.Mutex
 )
 
 type UpdateMessage struct {
@@ -128,6 +131,24 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
+	// Get IP from CF-Connecting-IP header for rate limiting
+	ip := r.Header.Get("CF-Connecting-IP")
+	if ip == "" {
+		ip = r.RemoteAddr
+	}
+
+	ipLimiter, ok := ips[ip]
+	if ok {
+		// Key exists in map
+	} else {
+		// Key does not exist in map
+		ipLimiter = rate.NewLimiter(rate.Limit(rateLimit), burstLimit)
+		fmt.Println("IP key not found for: " + ip)
+		ipMux.Lock()
+		ips[ip] = ipLimiter
+		ipMux.Unlock()
+	}
+
 	limiter := rate.NewLimiter(rate.Limit(rateLimit), burstLimit)
 
 	clientsMux.Lock()
@@ -166,7 +187,14 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err := limiter.Wait(ctx); err != nil {
-			log.Printf("Rate limit exceeded: %v", err)
+			log.Printf("Rate limit exceeded: %v\n", err)
+			conn.WriteMessage(websocket.TextMessage, []byte("Rate limit exceeded. Please slow down."))
+			continue
+		}
+
+		err = ipLimiter.Wait(ctx)
+		if err != nil {
+			log.Printf("Rate limit exceeded: %v\n", err)
 			conn.WriteMessage(websocket.TextMessage, []byte("Rate limit exceeded. Please slow down."))
 			continue
 		}
